@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    name: Lint, typecheck, pruebas y build
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: reservaya
+          POSTGRES_PASSWORD: reservaya
+          POSTGRES_DB: reservaya_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U reservaya"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://reservaya:reservaya@localhost:5432/reservaya_test
+      DATABASE_URL_TEST: postgresql://reservaya:reservaya@localhost:5432/reservaya_test
+      JWT_ACCESS_SECRET: secreto-solo-para-ci-0123456789
+      NODE_ENV: test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Formato
+        run: npm run format:check
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Pruebas backend (con cobertura)
+        run: npm run test:coverage -w backend
+
+      - name: Pruebas frontend
+        run: npm test -w frontend
+
+      - name: Build
+        run: npm run build

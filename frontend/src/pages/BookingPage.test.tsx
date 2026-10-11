@@ -58,6 +58,7 @@ describe('asistente de reserva', () => {
       contactPhone: null,
       address: null,
       description: null,
+      demoMode: false,
     });
   });
 

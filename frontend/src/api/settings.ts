@@ -10,6 +10,8 @@ export interface BusinessSettings {
   contactPhone: string | null;
   address: string | null;
   description: string | null;
+  /** true en la demo pública: los datos se reinician cada noche */
+  demoMode: boolean;
 }
 
 export async function fetchSettings() {

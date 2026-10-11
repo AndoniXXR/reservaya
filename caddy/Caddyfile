@@ -1,0 +1,29 @@
+# DOMAIN=reservaya.ejemplo.com  → HTTPS automático con Let's Encrypt
+# DOMAIN=http://localhost        → solo HTTP (pruebas locales del compose de producción)
+{$DOMAIN:http://localhost} {
+	encode zstd gzip
+
+	# API
+	handle /api/* {
+		reverse_proxy backend:4000
+	}
+
+	# Interfaz de Mailpit (solo existe con el perfil "demo")
+	handle /mailpit/* {
+		reverse_proxy mailpit:8025
+	}
+
+	# Frontend (SPA): cualquier ruta desconocida devuelve index.html
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+}

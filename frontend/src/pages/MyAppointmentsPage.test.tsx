@@ -44,6 +44,7 @@ describe('Mis citas', () => {
       contactPhone: null,
       address: null,
       description: null,
+      demoMode: false,
     });
     vi.mocked(appointmentsApi.fetchMyAppointments).mockImplementation(async (scope) =>
       scope === 'upcoming'

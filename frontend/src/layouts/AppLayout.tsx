@@ -2,6 +2,7 @@ import { Link, NavLink, Outlet, useNavigate } from 'react-router';
 import { useToast } from '@/components/toast/useToast';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/features/auth/useAuth';
+import { useSettings } from '@/hooks/useSettings';
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   `rounded-md px-3 py-2 text-sm font-medium transition ${
@@ -12,6 +13,7 @@ export function AppLayout() {
   const { user, loading, logout } = useAuth();
   const navigate = useNavigate();
   const toast = useToast();
+  const settings = useSettings();
 
   const handleLogout = async () => {
     // Salir primero de la ruta protegida para que no redirija a /login al vaciar la sesión
@@ -22,6 +24,15 @@ export function AppLayout() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      {settings.data?.demoMode && (
+        <p className="bg-amber-50 px-4 py-1.5 text-center text-xs text-amber-800">
+          Demo pública: los datos se reinician cada noche. Los correos se pueden ver en{' '}
+          <a href="/mailpit/" className="font-medium underline" target="_blank" rel="noreferrer">
+            /mailpit
+          </a>
+          .
+        </p>
+      )}
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-4 py-3">
           <Link to="/" className="text-xl font-bold tracking-tight text-brand-700">

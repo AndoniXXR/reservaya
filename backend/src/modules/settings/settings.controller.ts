@@ -1,12 +1,13 @@
 import type { RequestHandler } from 'express';
+import { env } from '../../config/env.ts';
 import type { BusinessSettings } from '../../generated/prisma/client.ts';
 import type { UpdateSettingsInput } from './settings.schemas.ts';
 import * as settingsService from './settings.service.ts';
 
-// Datos públicos del negocio (sin id interno)
+// Datos públicos del negocio (sin id interno) más si la instalación es la demo pública
 function toPublic(settings: BusinessSettings) {
   const { id: _id, ...rest } = settings;
-  return rest;
+  return { ...rest, demoMode: env.DEMO_MODE };
 }
 
 export const getSettings: RequestHandler = async (_req, res) => {
