@@ -113,7 +113,8 @@ export function AdminDashboardPage() {
       )}
       {stats.isError && <ErrorMessage error={stats.error} onRetry={() => stats.refetch()} />}
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      {/* Con un rango inválido no hay nada que mostrar: solo el aviso */}
+      <div className={`grid gap-6 lg:grid-cols-3 ${invalidRange ? 'hidden' : ''}`}>
         <section
           className="rounded-xl border border-slate-200 bg-white p-4 lg:col-span-2"
           aria-labelledby="por-dia"

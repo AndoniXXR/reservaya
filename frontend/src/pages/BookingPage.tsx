@@ -289,6 +289,7 @@ function StaffStep({
             type="button"
             onClick={() => onSelect(null, null)}
             aria-pressed={selectedId === null}
+            aria-label="Cualquiera disponible"
             className="rounded-xl border border-dashed border-slate-300 bg-white p-4 text-left transition hover:border-brand-500 focus-visible:outline-2 focus-visible:outline-brand-600"
           >
             <p className="font-semibold text-slate-900">Cualquiera disponible</p>
@@ -409,6 +410,7 @@ function DateTimeStep({
                     type="button"
                     onClick={() => onSlot(s)}
                     aria-pressed={isSelected}
+                    aria-label={`${s.label} con ${s.staffName}`}
                     className={`rounded-lg border px-2 py-2 text-sm transition hover:border-brand-500 focus-visible:outline-2 focus-visible:outline-brand-600 ${
                       isSelected
                         ? 'border-brand-600 bg-brand-50 text-brand-700'
@@ -451,6 +453,7 @@ function ConfirmStep({
   onSuccess: (appointment: Appointment) => void;
 }) {
   const { user, loading } = useAuth();
+  const isAdmin = user?.role === 'ADMIN';
   const navigate = useNavigate();
   const location = useLocation();
   const toast = useToast();
@@ -541,11 +544,24 @@ function ConfirmStep({
           </Alert>
         </div>
       )}
+      {isAdmin && (
+        <div className="mt-4">
+          <Alert tone="warning">
+            La cuenta de administrador no puede reservar como cliente. Para probar el flujo, entra
+            con una cuenta de cliente.
+          </Alert>
+        </div>
+      )}
       <div className="mt-6 flex flex-wrap justify-between gap-2">
         <Button variant="secondary" onClick={onBack}>
           Atrás
         </Button>
-        <Button size="lg" onClick={confirm} loading={mutation.isPending} disabled={loading}>
+        <Button
+          size="lg"
+          onClick={confirm}
+          loading={mutation.isPending}
+          disabled={loading || isAdmin}
+        >
           {user ? 'Confirmar reserva' : 'Iniciar sesión y confirmar'}
         </Button>
       </div>

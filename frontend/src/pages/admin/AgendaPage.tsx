@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { fetchAppointments, type Appointment } from '@/api/appointments';
 import { fetchStaff } from '@/api/staff';
 import { AppointmentDetailModal } from '@/features/appointments/AppointmentDetailModal';
+import { layoutLanes } from '@/features/appointments/layoutLanes';
 import { STATUS_LABELS } from '@/features/appointments/status';
 import { Button } from '@/components/ui/Button';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
@@ -33,6 +34,7 @@ function shiftDate(date: string, days: number): string {
 export function AgendaPage() {
   const [date, setDate] = useState(() => toDateString(new Date()));
   const [selected, setSelected] = useState<Appointment | null>(null);
+  const [showCancelled, setShowCancelled] = useState(false);
   const settings = useSettings();
   const timezone = settings.data?.timezone;
 
@@ -82,6 +84,15 @@ export function AgendaPage() {
               value={date}
               onChange={(e) => e.target.value && setDate(e.target.value)}
             />
+            <label className="flex items-center gap-2 pb-2 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                checked={showCancelled}
+                onChange={(e) => setShowCancelled(e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+              />
+              Mostrar canceladas
+            </label>
           </div>
         }
       />
@@ -122,7 +133,9 @@ export function AgendaPage() {
               ))}
             </div>
             {activeStaff.map((member) => {
-              const items = appointments.data.data.filter((a) => a.staff.id === member.id);
+              const items = appointments.data.data.filter(
+                (a) => a.staff.id === member.id && (showCancelled || a.status !== 'CANCELLED'),
+              );
               return (
                 <div
                   key={member.id}
@@ -137,18 +150,24 @@ export function AgendaPage() {
                       style={{ top: (hour - START_HOUR) * HOUR_HEIGHT }}
                     />
                   ))}
-                  {items.map((appointment) => {
+                  {layoutLanes(items, (a) => ({
+                    start: localMinutes(a.startsAt),
+                    end: localMinutes(a.endsAt),
+                  })).map(({ item: appointment, lane, lanes }) => {
                     const start = localMinutes(appointment.startsAt);
                     const end = localMinutes(appointment.endsAt);
                     const top = ((start - START_HOUR * 60) / 60) * HOUR_HEIGHT;
                     const height = Math.max(((end - start) / 60) * HOUR_HEIGHT, 22);
+                    // Citas solapadas (p. ej. una cancelada y otra vigente) van en carriles lado a lado
+                    const width = `calc(${100 / lanes}% - 6px)`;
+                    const left = `calc(${(100 / lanes) * lane}% + 4px)`;
                     return (
                       <button
                         key={appointment.id}
                         type="button"
                         onClick={() => setSelected(appointment)}
-                        className={`absolute inset-x-1 overflow-hidden rounded-md border px-2 py-1 text-left text-xs leading-tight transition hover:shadow focus-visible:outline-2 focus-visible:outline-brand-600 ${STATUS_STYLES[appointment.status]}`}
-                        style={{ top, height }}
+                        className={`absolute overflow-hidden rounded-md border px-2 py-1 text-left text-xs leading-tight transition hover:shadow focus-visible:outline-2 focus-visible:outline-brand-600 ${STATUS_STYLES[appointment.status]}`}
+                        style={{ top, height, left, width }}
                         title={`${appointment.client.name} · ${appointment.service.name} · ${STATUS_LABELS[appointment.status]}`}
                         aria-label={`${formatTime(appointment.startsAt, timezone)} ${appointment.client.name}, ${appointment.service.name}, ${STATUS_LABELS[appointment.status]}`}
                       >

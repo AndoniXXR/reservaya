@@ -218,6 +218,7 @@ function StaffFormModal({
                     type="checkbox"
                     value={service.id}
                     className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                    aria-label={service.name}
                     {...register('serviceIds')}
                   />
                   {service.name}
