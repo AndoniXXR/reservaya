@@ -1,0 +1,52 @@
+name: Base de datos
+
+# Aplica migraciones (y opcionalmente el seed) a la base de datos de producción.
+# Se lanza a mano desde la pestaña Actions o automáticamente en cada push a main
+# cuando existe el secret DATABASE_URL (despliegue en Vercel + Neon).
+on:
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: 'Ejecutar también el seed (borra y recrea los datos de demo)'
+        type: boolean
+        default: false
+  push:
+    branches: [main]
+
+jobs:
+  migrate:
+    name: Migraciones
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - name: Sin DATABASE_URL no hay nada que hacer
+        if: ${{ env.DATABASE_URL == '' }}
+        run: echo "Secret DATABASE_URL no definido; se omite." && exit 0
+
+      - uses: actions/checkout@v4
+        if: ${{ env.DATABASE_URL != '' }}
+
+      - uses: actions/setup-node@v4
+        if: ${{ env.DATABASE_URL != '' }}
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Instalar dependencias
+        if: ${{ env.DATABASE_URL != '' }}
+        run: npm ci
+
+      - name: prisma migrate deploy
+        if: ${{ env.DATABASE_URL != '' }}
+        run: npx prisma migrate deploy
+        working-directory: backend
+
+      - name: prisma db seed
+        if: ${{ env.DATABASE_URL != '' && github.event_name == 'workflow_dispatch' && inputs.seed }}
+        run: npx prisma db seed
+        working-directory: backend
+        env:
+          JWT_ACCESS_SECRET: solo-para-el-seed-0123456789abcdef
+          NODE_ENV: production
+          SMTP_HOST: 127.0.0.1

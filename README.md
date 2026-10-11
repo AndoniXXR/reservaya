@@ -148,7 +148,29 @@ schtasks /Create /F /SC ONLOGON /TN "WSL Docker keep-alive" /RL LIMITED /TR "pow
 npm test
 ```
 
-## Despliegue en AWS EC2
+## Despliegue en Vercel + Neon (gratuito, el usado por la demo)
+
+Frontend estático y API como función serverless en el mismo proyecto de Vercel (`api/index.js` expone la app de Express compilada; `vercel.json` enruta `/api/*` a la función y el resto a `index.html`). PostgreSQL en Neon y correo por SMTP de Brevo. Los recordatorios y el reinicio de la demo corren con Vercel Cron una vez al día (`/api/jobs/*`, protegidos con `CRON_SECRET`); en el despliegue con Docker siguen corriendo con node-cron cada 10 minutos.
+
+1. **Neon**: crea un proyecto y copia la cadena de conexión *pooled* (`DATABASE_URL`) y la directa (para migraciones).
+2. **GitHub → Settings → Secrets**: `DATABASE_URL` (cadena directa). El workflow "Base de datos" aplica las migraciones en cada push a `main`; lánzalo a mano con la casilla *seed* para cargar los datos de demo.
+3. **Vercel**: importa el repositorio (raíz del monorepo, framework "Other"; `vercel.json` ya define build y salida). Variables de entorno:
+
+   | Variable | Valor |
+   | --- | --- |
+   | `DATABASE_URL` | cadena *pooled* de Neon |
+   | `JWT_ACCESS_SECRET` | `openssl rand -hex 32` |
+   | `APP_URL`, `CORS_ORIGIN` | `https://<proyecto>.vercel.app` |
+   | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `MAIL_FROM` | datos SMTP de Brevo (`smtp-relay.brevo.com`, 587) |
+   | `CRON_SECRET` | `openssl rand -hex 32` (Vercel lo envía en sus crons) |
+   | `DEMO_MODE` | `true` para la demo pública |
+   | `NODE_ENV` | `production` |
+
+4. Cada push a `main` despliega automáticamente.
+
+Limitación conocida: en serverless el límite de intentos de login se reinicia con cada instancia (es por proceso, no global).
+
+## Despliegue en AWS EC2 (alternativa con Docker)
 
 El flujo: un push a `main` ejecuta CI (lint, typecheck, pruebas, build); si pasa, `deploy.yml` construye las imágenes, las publica en GHCR y entra por SSH al servidor para hacer `docker compose pull && up -d`. Las migraciones se aplican en un contenedor `migrate` del que depende el backend.
 

@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { TZDate } from '@date-fns/tz';
 import { addDays, addMinutes, startOfDay, subDays } from 'date-fns';
 import { prisma } from '../config/prisma.ts';

@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { env } from '../../config/env.ts';
 import { logger } from '../../config/logger.ts';
 import { prisma } from '../../config/prisma.ts';

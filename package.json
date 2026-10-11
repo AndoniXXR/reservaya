@@ -18,10 +18,11 @@
     "build": "npm run build --workspaces --if-present",
     "seed": "npm run db:seed -w backend",
     "db:migrate": "npm run db:migrate -w backend",
-    "test:coverage": "npm run test:coverage --workspaces --if-present"
+    "test:coverage": "npm run test:coverage --workspaces --if-present",
+    "build:vercel": "npm run build -w backend && npm run build -w frontend"
   },
   "engines": {
-    "node": ">=24"
+    "node": ">=22"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -32,5 +33,6 @@
     "globals": "^17.13.0",
     "prettier": "^3.9.10",
     "typescript-eslint": "^8.71.1"
-  }
+  },
+  "type": "module"
 }

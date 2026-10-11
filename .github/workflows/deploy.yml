@@ -1,6 +1,8 @@
-name: Deploy
+name: Deploy (EC2 con Docker)
 
-# Se ejecuta cuando el workflow CI termina con éxito en main.
+# Despliegue alternativo en un servidor con Docker. Solo se ejecuta si la variable de
+# repositorio DEPLOY_TARGET vale 'ec2' (Settings → Variables). El despliegue por defecto
+# es Vercel, que se conecta directamente al repositorio.
 on:
   workflow_run:
     workflows: [CI]
@@ -17,7 +19,7 @@ env:
 jobs:
   build-and-push:
     name: Construir y publicar imágenes
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' && vars.DEPLOY_TARGET == 'ec2' }}
     runs-on: ubuntu-latest
     outputs:
       prefix: ${{ steps.meta.outputs.prefix }}
