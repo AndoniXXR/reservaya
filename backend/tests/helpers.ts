@@ -19,6 +19,8 @@ export async function resetDatabase() {
   await prisma.staff.deleteMany();
   await prisma.service.deleteMany();
   await prisma.user.deleteMany();
+  // La configuración vuelve a los valores por defecto (se recrea al primer getSettings)
+  await prisma.businessSettings.deleteMany();
 }
 
 export async function createUser(

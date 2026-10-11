@@ -6,8 +6,10 @@ import { ServicesPage } from '@/pages/admin/ServicesPage';
 import { SettingsPage } from '@/pages/admin/SettingsPage';
 import { StaffDetailPage } from '@/pages/admin/StaffDetailPage';
 import { StaffPage } from '@/pages/admin/StaffPage';
+import { BookingPage } from '@/pages/BookingPage';
 import { HomePage } from '@/pages/HomePage';
 import { LoginPage } from '@/pages/LoginPage';
+import { MyAppointmentsPage } from '@/pages/MyAppointmentsPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { ProfilePage } from '@/pages/ProfilePage';
 import { RegisterPage } from '@/pages/RegisterPage';
@@ -21,8 +23,10 @@ export function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/registro" element={<RegisterPage />} />
+        <Route path="/reservar" element={<BookingPage />} />
 
         <Route element={<RequireAuth />}>
+          <Route path="/mis-citas" element={<MyAppointmentsPage />} />
           <Route path="/perfil" element={<ProfilePage />} />
           <Route element={<RequireRole role="ADMIN" />}>
             <Route path="/admin" element={<AdminLayout />}>

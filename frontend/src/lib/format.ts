@@ -37,3 +37,11 @@ export function formatTime(value: string | Date, timezone = DEFAULT_TIMEZONE): s
 }
 
 export const DAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
+/** YYYY-MM-DD de una fecha en hora local del navegador. */
+export function toDateString(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}

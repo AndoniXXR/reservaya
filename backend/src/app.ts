@@ -6,7 +6,9 @@ import { pinoHttp } from 'pino-http';
 import { env } from './config/env.ts';
 import { logger } from './config/logger.ts';
 import { healthRouter } from './modules/health/health.routes.ts';
+import { appointmentsRouter } from './modules/appointments/appointments.routes.ts';
 import { authRouter } from './modules/auth/auth.routes.ts';
+import { availabilityRouter } from './modules/availability/availability.routes.ts';
 import { servicesRouter } from './modules/services/services.routes.ts';
 import { settingsRouter } from './modules/settings/settings.routes.ts';
 import { staffRouter, timeOffRouter } from './modules/staff/staff.routes.ts';
@@ -44,6 +46,8 @@ export function createApp() {
   app.use('/api/services', servicesRouter);
   app.use('/api/staff', staffRouter);
   app.use('/api/time-off', timeOffRouter);
+  app.use('/api/availability', availabilityRouter);
+  app.use('/api/appointments', appointmentsRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
