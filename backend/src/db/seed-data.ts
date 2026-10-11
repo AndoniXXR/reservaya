@@ -20,7 +20,8 @@ function createRandom(seed: number) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
-const random = createRandom(20261103);
+const SEED = 20261103;
+let random = createRandom(SEED);
 const pick = <T>(items: readonly T[]): T => items[Math.floor(random() * items.length)]!;
 const randomInt = (min: number, max: number) => min + Math.floor(random() * (max - min + 1));
 
@@ -188,6 +189,8 @@ async function clean() {
 }
 
 export async function runSeed(): Promise<void> {
+  // Misma secuencia en cada ejecución: el seed es determinista y repetible
+  random = createRandom(SEED);
   logger.info('Limpiando datos anteriores...');
   await clean();
 

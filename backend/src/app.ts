@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import { pinoHttp } from 'pino-http';
 import { env } from './config/env.ts';
 import { logger } from './config/logger.ts';
+import { docsRouter } from './docs/docs.routes.ts';
 import { healthRouter } from './modules/health/health.routes.ts';
 import { appointmentsRouter } from './modules/appointments/appointments.routes.ts';
 import { authRouter } from './modules/auth/auth.routes.ts';
@@ -50,6 +51,7 @@ export function createApp() {
   app.use('/api/availability', availabilityRouter);
   app.use('/api/appointments', appointmentsRouter);
   app.use('/api/stats', statsRouter);
+  app.use('/api', docsRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

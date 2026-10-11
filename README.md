@@ -32,6 +32,7 @@ Credenciales de prueba tras el seed:
 
 - Frontend: http://localhost:5173
 - API: http://localhost:4000/api/health
+- Documentación de la API (Swagger): http://localhost:4000/api/docs
 - Correos de prueba (Mailpit): http://localhost:8025
 
 También puede levantarse todo en contenedores con `docker compose up`.
@@ -53,6 +54,7 @@ schtasks /Create /F /SC ONLOGON /TN "WSL Docker keep-alive" /RL LIMITED /TR "pow
 | `npm run lint`      | ESLint en todo el monorepo                |
 | `npm run typecheck` | `tsc` en backend y frontend               |
 | `npm test`          | Pruebas (backend necesita la base `db`)   |
+| `npm run test:coverage` | Pruebas con cobertura (backend exige ≥ 70 %) |
 | `npm run format`    | Prettier                                  |
 | `npm run db:migrate` | Crea/aplica migraciones de Prisma        |
 | `npm run seed`      | Limpia la base y carga los datos de demo  |
