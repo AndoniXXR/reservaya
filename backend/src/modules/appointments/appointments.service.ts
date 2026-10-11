@@ -12,6 +12,11 @@ import {
   localDayOfWeek,
 } from '../availability/availability.core.ts';
 import { loadStaffAvailabilityData } from '../availability/availability.service.ts';
+import {
+  notifyInBackground,
+  sendCancellation,
+  sendConfirmation,
+} from '../notifications/notifications.service.ts';
 import { getSettings } from '../settings/settings.service.ts';
 import type {
   AdminListQuery,
@@ -178,7 +183,9 @@ export async function createAppointment(
         include,
       });
     });
-    return toPublicAppointment(appointment);
+    const created = toPublicAppointment(appointment);
+    notifyInBackground(() => sendConfirmation(created), { appointmentId: created.id });
+    return created;
   } catch (error) {
     // La restricción de exclusión de PostgreSQL es la última barrera ante peticiones simultáneas
     if (isExclusionViolation(error)) {
@@ -233,7 +240,9 @@ export async function cancelAppointment(
     data: { status: 'CANCELLED', cancelledAt: new Date(), cancelledBy: actor.role },
     include,
   });
-  return toPublicAppointment(updated);
+  const cancelled = toPublicAppointment(updated);
+  notifyInBackground(() => sendCancellation(cancelled, actor.role), { appointmentId: id });
+  return cancelled;
 }
 
 export async function updateStatus(

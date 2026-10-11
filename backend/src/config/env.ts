@@ -15,6 +15,15 @@ const envSchema = z.object({
   JWT_ACCESS_TTL: z.string().default('15m'),
   REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().positive().default(7),
   REFRESH_GRACE_SECONDS: z.coerce.number().int().nonnegative().default(30),
+  SMTP_HOST: z.string().default('127.0.0.1'),
+  SMTP_PORT: z.coerce.number().int().positive().default(1025),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASSWORD: z.string().optional(),
+  SMTP_SECURE: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((value) => value === 'true'),
+  MAIL_FROM: z.string().default('ReservaYa <no-responder@reservaya.demo>'),
 });
 
 export type Env = z.infer<typeof envSchema>;
