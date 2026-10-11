@@ -1,0 +1,76 @@
+# Entorno de desarrollo.
+# Día a día:   docker compose up -d db mailpit   +   npm run dev
+# Todo junto:  docker compose up
+name: reservaya
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-reservaya}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-reservaya}
+      POSTGRES_DB: ${POSTGRES_DB:-reservaya}
+    ports:
+      - '5432:5432'
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./backend/docker/init-test-db.sh:/docker-entrypoint-initdb.d/init-test-db.sh:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - '1025:1025' # SMTP
+      - '8025:8025' # Interfaz web
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: dev
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-reservaya}:${POSTGRES_PASSWORD:-reservaya}@db:5432/${POSTGRES_DB:-reservaya}
+      SMTP_HOST: mailpit
+      # Los bind mounts desde Windows no emiten eventos de archivo: usar polling
+      CHOKIDAR_USEPOLLING: 'true'
+    ports:
+      - '4000:4000'
+    volumes:
+      - ./backend:/app
+      - backend-node-modules:/app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: dev
+    environment:
+      VITE_API_URL: http://localhost:4000/api
+      CHOKIDAR_USEPOLLING: 'true'
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./frontend:/app
+      - frontend-node-modules:/app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  db-data:
+  backend-node-modules:
+  frontend-node-modules:
