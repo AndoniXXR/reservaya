@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
-import { createAppointment, type Appointment } from '@/api/appointments';
+import { createAppointment, fetchMyAppointments, type Appointment } from '@/api/appointments';
 import { fetchAvailability, type Slot } from '@/api/availability';
 import { getApiError, getApiErrorMessage } from '@/api/errors';
 import { fetchServices, type Service } from '@/api/services';
@@ -23,6 +23,7 @@ import {
   type BookingDraft,
 } from '@/features/booking/draft';
 import { useSettings } from '@/hooks/useSettings';
+import { loginPath } from '@/lib/returnTo';
 import {
   formatDate,
   formatDateTime,
@@ -57,6 +58,7 @@ export function BookingPage() {
   return (
     <div className="mx-auto w-full max-w-3xl">
       <h1 className="mb-6 text-2xl font-bold text-slate-900">Reservar una cita</h1>
+      <UpcomingLimitNotice />
       <Stepper current={draft.step} onSelect={goTo} draft={draft} />
 
       {draft.step === 1 && (
@@ -107,6 +109,31 @@ export function BookingPage() {
           }}
         />
       )}
+    </div>
+  );
+}
+
+const MAX_UPCOMING = 5;
+
+/** Avisa al entrar, no al final del asistente, cuando el cliente ya alcanzó el límite de citas. */
+function UpcomingLimitNotice() {
+  const { user } = useAuth();
+  const upcoming = useQuery({
+    queryKey: ['appointments', 'mine', 'upcoming'],
+    queryFn: () => fetchMyAppointments('upcoming'),
+    enabled: user !== null,
+  });
+  if (!upcoming.data || upcoming.data.length < MAX_UPCOMING) return null;
+  return (
+    <div className="mb-6">
+      <Alert tone="warning">
+        Ya tienes {MAX_UPCOMING} citas próximas, el máximo permitido. Para reservar otra, cancela
+        alguna desde{' '}
+        <Link to="/mis-citas" className="font-medium underline">
+          Mis citas
+        </Link>
+        .
+      </Alert>
     </div>
   );
 }
@@ -272,6 +299,7 @@ function StaffStep({
               key={member.id}
               type="button"
               onClick={() => onSelect(member.id, member.name)}
+              aria-label={member.bio ? `${member.name}, ${member.bio}` : member.name}
               aria-pressed={selectedId === member.id}
               className={`rounded-xl border p-4 text-left transition hover:border-brand-500 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-brand-600 ${
                 selectedId === member.id
@@ -459,7 +487,7 @@ function ConfirmStep({
 
   const confirm = () => {
     if (!user) {
-      navigate('/login', { state: { from: location } });
+      navigate(loginPath(location));
       return;
     }
     mutation.mutate();
@@ -507,7 +535,7 @@ function ConfirmStep({
         <div className="mt-4">
           <Alert tone="info">
             Para confirmar necesitas iniciar sesión. Tu selección se conserva.{' '}
-            <Link to="/registro" state={{ from: location }} className="font-medium underline">
+            <Link to={loginPath(location, '/registro')} className="font-medium underline">
               ¿No tienes cuenta?
             </Link>
           </Alert>

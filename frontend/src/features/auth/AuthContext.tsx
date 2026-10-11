@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react
 import * as authApi from '@/api/auth';
 import type { RegisterPayload, User } from '@/api/auth';
 import { refreshAccessToken, tokenStore } from '@/api/client';
+import { clearDraft } from '@/features/booking/draft';
 import { AuthContext, type AuthContextValue } from './context';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -53,6 +54,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       tokenStore.set(null);
       setUserState(null);
       queryClient.clear();
+      // En un dispositivo compartido el siguiente usuario no debe heredar la selección
+      clearDraft();
     }
   }, [queryClient]);
 

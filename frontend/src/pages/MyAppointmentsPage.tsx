@@ -150,12 +150,13 @@ export function MyAppointmentsPage() {
         description={
           toCancel && (
             <p>
-              ¿Seguro que quieres cancelar tu cita de <strong>{toCancel.service.name}</strong> el{' '}
+              ¿Seguro que quieres cancelar tu cita de <strong>{toCancel.service.name}</strong> del{' '}
               {formatDateTime(toCancel.startsAt, timezone)}?
             </p>
           )
         }
         confirmLabel="Sí, cancelar"
+        cancelLabel="No, mantener"
         danger
         loading={cancel.isPending}
         onConfirm={() => toCancel && cancel.mutate(toCancel.id)}

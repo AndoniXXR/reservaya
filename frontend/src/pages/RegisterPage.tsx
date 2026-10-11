@@ -7,11 +7,8 @@ import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useAuth } from '@/features/auth/useAuth';
+import { readReturnTo } from '@/lib/returnTo';
 import { registerSchema, type RegisterForm } from '@/lib/schemas';
-
-interface LocationState {
-  from?: { pathname: string; search?: string };
-}
 
 export function RegisterPage() {
   const { register: registerUser, user } = useAuth();
@@ -26,8 +23,7 @@ export function RegisterPage() {
     formState: { errors, isSubmitting },
   } = useForm<RegisterForm>({ resolver: zodResolver(registerSchema) });
 
-  const from = (location.state as LocationState | null)?.from;
-  const redirectTo = from ? `${from.pathname}${from.search ?? ''}` : '/';
+  const redirectTo = readReturnTo(location.search);
 
   const onSubmit = handleSubmit(async (values) => {
     setServerError(null);
@@ -100,8 +96,7 @@ export function RegisterPage() {
       <p className="mt-6 text-center text-sm text-slate-600">
         ¿Ya tienes cuenta?{' '}
         <Link
-          to="/login"
-          state={location.state}
+          to={`/login${location.search}`}
           className="font-medium text-brand-600 hover:underline"
         >
           Inicia sesión
