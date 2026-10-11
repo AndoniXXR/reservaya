@@ -45,7 +45,7 @@ export function StaffPage() {
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['staff'] });
 
   const toggle = useMutation({
-    mutationFn: toggleStaff,
+    mutationFn: (id: string) => toggleStaff(id),
     onSuccess: ({ staff: member, affectedAppointments }) => {
       invalidate();
       toast(member.active ? 'Profesional activado' : 'Profesional desactivado', 'success');

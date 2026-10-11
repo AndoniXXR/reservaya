@@ -29,7 +29,7 @@ export function MyAppointmentsPage() {
   });
 
   const cancel = useMutation({
-    mutationFn: cancelAppointment,
+    mutationFn: (id: string) => cancelAppointment(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
       queryClient.invalidateQueries({ queryKey: ['availability'] });

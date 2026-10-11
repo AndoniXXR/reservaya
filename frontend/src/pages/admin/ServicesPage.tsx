@@ -53,7 +53,7 @@ export function ServicesPage() {
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['services'] });
 
   const toggle = useMutation({
-    mutationFn: toggleService,
+    mutationFn: (id: string) => toggleService(id),
     onSuccess: (service) => {
       invalidate();
       toast(service.active ? 'Servicio activado' : 'Servicio desactivado', 'success');

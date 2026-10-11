@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Route, Routes } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -81,7 +81,7 @@ describe('Mis citas', () => {
     const [far] = await screen.findAllByRole('listitem');
     await userEvent.click(within(far!).getByRole('button', { name: 'Cancelar' }));
     await userEvent.click(await screen.findByRole('button', { name: 'Sí, cancelar' }));
-    expect(appointmentsApi.cancelAppointment).toHaveBeenCalledWith('a1');
+    await waitFor(() => expect(appointmentsApi.cancelAppointment).toHaveBeenCalledWith('a1'));
   });
 
   it('la pestaña Historial muestra las citas pasadas', async () => {
