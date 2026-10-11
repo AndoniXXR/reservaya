@@ -7,4 +7,5 @@ ENV CI=true
 FROM base AS dev
 COPY package.json ./
 RUN npm install
-CMD ["npx", "tsx", "watch", "src/server.ts"]
+# Genera el cliente Prisma y aplica migraciones pendientes antes de arrancar
+CMD ["sh", "-c", "npx prisma generate && npx prisma migrate deploy && npx tsx watch src/server.ts"]

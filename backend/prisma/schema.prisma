@@ -1,0 +1,157 @@
+// Todas las fechas se guardan en UTC (timestamptz). La conversión a la zona del negocio
+// se hace solo al calcular disponibilidad y al mostrar.
+
+generator client {
+  provider               = "prisma-client"
+  output                 = "../src/generated/prisma"
+  runtime                = "nodejs"
+  moduleFormat           = "esm"
+  generatedFileExtension = "ts"
+  importFileExtension    = "ts"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  CLIENT
+  ADMIN
+}
+
+enum AppointmentStatus {
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+model User {
+  id            String         @id @default(uuid())
+  name          String
+  email         String         @unique
+  phone         String?
+  passwordHash  String
+  role          Role           @default(CLIENT)
+  createdAt     DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime       @updatedAt @db.Timestamptz(3)
+  appointments  Appointment[]
+  refreshTokens RefreshToken[]
+}
+
+model RefreshToken {
+  id           String    @id @default(uuid())
+  tokenHash    String    @unique
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt    DateTime  @db.Timestamptz(3)
+  revokedAt    DateTime? @db.Timestamptz(3)
+  /// Token emitido al rotar este; permite el periodo de gracia de 30 s
+  replacedById String?
+  createdAt    DateTime  @default(now()) @db.Timestamptz(3)
+
+  @@index([userId])
+}
+
+model Service {
+  id              String         @id @default(uuid())
+  name            String
+  description     String?
+  /// Múltiplo de slotIntervalMinutes, entre 15 y 240
+  durationMinutes Int
+  price           Decimal        @db.Decimal(10, 2)
+  active          Boolean        @default(true)
+  createdAt       DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime       @updatedAt @db.Timestamptz(3)
+  staff           StaffService[]
+  appointments    Appointment[]
+}
+
+model Staff {
+  id           String         @id @default(uuid())
+  name         String
+  bio          String?
+  active       Boolean        @default(true)
+  createdAt    DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime       @updatedAt @db.Timestamptz(3)
+  services     StaffService[]
+  workingHours WorkingHours[]
+  timeOff      TimeOff[]
+  appointments Appointment[]
+}
+
+model StaffService {
+  staffId   String
+  serviceId String
+  staff     Staff   @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@id([staffId, serviceId])
+}
+
+/// Puede haber varios bloques por día (ej. 09:00-13:00 y 14:00-18:00)
+model WorkingHours {
+  id        String @id @default(uuid())
+  staffId   String
+  staff     Staff  @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  /// 0 = domingo ... 6 = sábado
+  dayOfWeek Int
+  /// "09:00" en hora local del negocio
+  startTime String
+  /// "17:00" en hora local del negocio
+  endTime   String
+
+  @@index([staffId, dayOfWeek])
+}
+
+model TimeOff {
+  id       String   @id @default(uuid())
+  staffId  String
+  staff    Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  startsAt DateTime @db.Timestamptz(3)
+  endsAt   DateTime @db.Timestamptz(3)
+  reason   String?
+
+  @@index([staffId, startsAt])
+}
+
+model Appointment {
+  id             String            @id @default(uuid())
+  clientId       String
+  staffId        String
+  serviceId      String
+  client         User              @relation(fields: [clientId], references: [id])
+  staff          Staff             @relation(fields: [staffId], references: [id])
+  service        Service           @relation(fields: [serviceId], references: [id])
+  startsAt       DateTime          @db.Timestamptz(3)
+  endsAt         DateTime          @db.Timestamptz(3)
+  status         AppointmentStatus @default(CONFIRMED)
+  /// Precio congelado al reservar
+  priceAtBooking Decimal           @db.Decimal(10, 2)
+  notes          String?
+  reminderSentAt DateTime?         @db.Timestamptz(3)
+  cancelledAt    DateTime?         @db.Timestamptz(3)
+  cancelledBy    Role?
+  createdAt      DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime          @updatedAt @db.Timestamptz(3)
+
+  @@index([staffId, startsAt])
+  @@index([clientId, startsAt])
+}
+
+/// Fila única (id = 1)
+model BusinessSettings {
+  id                  Int     @id @default(1)
+  businessName        String  @default("ReservaYa Demo")
+  timezone            String  @default("America/Guatemala")
+  slotIntervalMinutes Int     @default(15)
+  /// No se puede reservar con menos de estas horas de anticipación
+  minAdvanceHours     Int     @default(2)
+  /// No se puede reservar a más de estos días
+  maxAdvanceDays      Int     @default(30)
+  /// El cliente solo cancela con estas horas de anticipación
+  cancellationHours   Int     @default(12)
+  contactPhone        String?
+  address             String?
+  description         String?
+}

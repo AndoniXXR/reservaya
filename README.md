@@ -18,8 +18,17 @@ Requisitos: Node 24, Docker (Docker Engine en WSL 2 sirve; no hace falta Docker 
 cp .env.example .env
 npm install
 docker compose up -d db mailpit
+npm run db:migrate
+npm run seed
 npm run dev
 ```
+
+Credenciales de prueba tras el seed:
+
+| Rol     | Correo                   | Contraseña    |
+| ------- | ------------------------ | ------------- |
+| Admin   | `admin@reservaya.demo`   | `Admin1234`   |
+| Cliente | `cliente@reservaya.demo` | `Cliente1234` |
 
 - Frontend: http://localhost:5173
 - API: http://localhost:4000/api/health
@@ -45,3 +54,5 @@ schtasks /Create /F /SC ONLOGON /TN "WSL Docker keep-alive" /RL LIMITED /TR "pow
 | `npm run typecheck` | `tsc` en backend y frontend               |
 | `npm test`          | Pruebas (backend necesita la base `db`)   |
 | `npm run format`    | Prettier                                  |
+| `npm run db:migrate` | Crea/aplica migraciones de Prisma        |
+| `npm run seed`      | Limpia la base y carga los datos de demo  |

@@ -1,3 +1,4 @@
+import { TEST_DATABASE_URL } from './test-env.ts';
+
 process.env.NODE_ENV = 'test';
-process.env.DATABASE_URL =
-  process.env.DATABASE_URL_TEST ?? 'postgresql://reservaya:reservaya@localhost:5432/reservaya_test';
+process.env.DATABASE_URL = TEST_DATABASE_URL;
