@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link, useLocation, useNavigate } from 'react-router';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router';
 import { getApiError, getApiErrorMessage } from '@/api/errors';
 import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
@@ -14,7 +14,7 @@ interface LocationState {
 }
 
 export function RegisterPage() {
-  const { register: registerUser } = useAuth();
+  const { register: registerUser, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -48,6 +48,9 @@ export function RegisterPage() {
       setServerError(getApiErrorMessage(error));
     }
   });
+
+  // Con sesión iniciada no tiene sentido mostrar el formulario
+  if (user) return <Navigate to={redirectTo} replace />;
 
   return (
     <div className="mx-auto w-full max-w-md">

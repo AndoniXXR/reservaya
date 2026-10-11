@@ -23,7 +23,13 @@ import {
   type BookingDraft,
 } from '@/features/booking/draft';
 import { useSettings } from '@/hooks/useSettings';
-import { formatDateTime, formatDuration, formatPrice, toDateString } from '@/lib/format';
+import {
+  formatDate,
+  formatDateTime,
+  formatDuration,
+  formatPrice,
+  toDateString,
+} from '@/lib/format';
 
 const STEPS = ['Servicio', 'Profesional', 'Fecha y hora', 'Confirmar'];
 
@@ -133,6 +139,7 @@ function Stepper({
               disabled={!isDone}
               onClick={() => onSelect(step)}
               aria-current={isCurrent ? 'step' : undefined}
+              aria-label={`${index + 1}. ${label}${isDone && summaries[index] ? `: ${summaries[index]}` : ''}`}
               className={`w-full rounded-lg border px-3 py-2 text-left text-sm transition ${
                 isCurrent
                   ? 'border-brand-600 bg-brand-50 text-brand-700'
@@ -196,6 +203,7 @@ function ServiceStep({
             type="button"
             onClick={() => onSelect(service)}
             aria-pressed={selected?.id === service.id}
+            aria-label={`${service.name}, ${formatDuration(service.durationMinutes)}, ${formatPrice(service.price)}`}
             className={`rounded-xl border p-4 text-left transition hover:border-brand-500 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-brand-600 ${
               selected?.id === service.id
                 ? 'border-brand-600 bg-brand-50'
@@ -333,6 +341,12 @@ function DateTimeStep({
               Elige un día para ver los horarios disponibles.
             </p>
           )}
+          {date && (
+            <p className="mb-3 text-sm font-medium text-slate-800" aria-live="polite">
+              {formatDate(`${date}T12:00:00`, undefined)}
+              {staffId === null && ' · se muestra el profesional de cada horario'}
+            </p>
+          )}
           {date && availability.isPending && (
             <div
               className="grid grid-cols-3 gap-2 sm:grid-cols-4"
@@ -355,7 +369,7 @@ function DateTimeStep({
           )}
           {date && availability.data && availability.data.slots.length > 0 && (
             <div
-              className="grid grid-cols-3 gap-2 sm:grid-cols-4"
+              className={`grid gap-2 ${staffId === null ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-3 sm:grid-cols-4'}`}
               role="group"
               aria-label="Horarios disponibles"
             >
@@ -375,7 +389,9 @@ function DateTimeStep({
                   >
                     <span className="block font-medium">{s.label}</span>
                     {staffId === null && (
-                      <span className="block truncate text-xs text-slate-500">{s.staffName}</span>
+                      <span className="block text-xs leading-tight break-words text-slate-500">
+                        {s.staffName}
+                      </span>
                     )}
                   </button>
                 );

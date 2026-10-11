@@ -22,7 +22,7 @@ import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { Input } from '@/components/ui/Input';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { TableSkeleton } from '@/components/ui/Skeleton';
-import { DAY_NAMES, formatDateTime } from '@/lib/format';
+import { DAY_NAMES, formatTimeOffRange } from '@/lib/format';
 
 // Lunes primero, domingo al final
 const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
@@ -286,9 +286,7 @@ function TimeOffManager({ staffId }: { staffId: string }) {
               className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm"
             >
               <div>
-                <p className="font-medium text-slate-900">
-                  {formatDateTime(item.startsAt)} → {formatDateTime(item.endsAt)}
-                </p>
+                <p className="font-medium text-slate-900">{formatTimeOffRange(item)}</p>
                 {item.reason && <p className="text-xs text-slate-500">{item.reason}</p>}
               </div>
               <Button variant="ghost" size="sm" onClick={() => setToDelete(item)}>

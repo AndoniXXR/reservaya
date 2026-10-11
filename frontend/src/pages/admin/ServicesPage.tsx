@@ -1,9 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { getApiErrorMessage } from '@/api/errors';
+import { getApiError, getApiErrorMessage } from '@/api/errors';
 import {
   createService,
   fetchServices,
@@ -24,22 +24,25 @@ import { Textarea } from '@/components/ui/Textarea';
 import { useSettings } from '@/hooks/useSettings';
 import { formatDuration, formatPrice } from '@/lib/format';
 
-const serviceSchema = z.object({
-  name: z.string().trim().min(2, 'Mínimo 2 caracteres').max(80, 'Máximo 80 caracteres'),
-  description: z.string().trim().max(300, 'Máximo 300 caracteres'),
-  durationMinutes: z.coerce
-    .number({ error: 'Indica la duración' })
-    .int('Debe ser un número entero')
-    .min(15, 'Mínimo 15 minutos')
-    .max(240, 'Máximo 240 minutos'),
-  price: z.coerce
-    .number({ error: 'Indica el precio' })
-    .positive('Debe ser mayor que 0')
-    .multipleOf(0.01, 'Máximo dos decimales'),
-});
+// El intervalo del negocio (15/30/60) se conoce en tiempo de ejecución, por eso el esquema se construye
+const buildServiceSchema = (step: number) =>
+  z.object({
+    name: z.string().trim().min(2, 'Mínimo 2 caracteres').max(80, 'Máximo 80 caracteres'),
+    description: z.string().trim().max(300, 'Máximo 300 caracteres'),
+    durationMinutes: z.coerce
+      .number({ error: 'Indica la duración' })
+      .int('Debe ser un número entero')
+      .min(15, 'Mínimo 15 minutos')
+      .max(240, 'Máximo 240 minutos')
+      .multipleOf(step, `Debe ser múltiplo de ${step} minutos`),
+    price: z.coerce
+      .number({ error: 'Indica el precio' })
+      .positive('Debe ser mayor que 0')
+      .multipleOf(0.01, 'Máximo dos decimales'),
+  });
 // z.coerce acepta cualquier entrada (unknown) y produce números: RHF necesita ambos tipos
-type ServiceFormInput = z.input<typeof serviceSchema>;
-type ServiceForm = z.output<typeof serviceSchema>;
+type ServiceFormInput = z.input<ReturnType<typeof buildServiceSchema>>;
+type ServiceForm = z.output<ReturnType<typeof buildServiceSchema>>;
 
 const servicesKey = ['services', 'all'] as const;
 
@@ -155,6 +158,8 @@ function ServiceFormModal({
   const settings = useSettings();
   const isNew = service === 'new';
   const current = isNew || service === null ? null : service;
+  const step = settings.data?.slotIntervalMinutes ?? 15;
+  const schema = useMemo(() => buildServiceSchema(step), [step]);
 
   const {
     register,
@@ -162,7 +167,7 @@ function ServiceFormModal({
     setError,
     formState: { errors },
   } = useForm<ServiceFormInput, unknown, ServiceForm>({
-    resolver: zodResolver(serviceSchema),
+    resolver: zodResolver(schema),
     values: {
       name: current?.name ?? '',
       description: current?.description ?? '',
@@ -181,13 +186,12 @@ function ServiceFormModal({
       onSaved();
     },
     onError: (error) => {
-      const message = getApiErrorMessage(error);
-      if (message.includes('múltiplo')) setError('durationMinutes', { message });
-      else toast(message, 'error');
+      // Un error de validación del servidor se muestra junto al campo, sin prefijo genérico
+      const detail = getApiError(error)?.details?.durationMinutes;
+      if (detail) setError('durationMinutes', { message: detail });
+      else toast(getApiErrorMessage(error), 'error');
     },
   });
-
-  const step = settings.data?.slotIntervalMinutes ?? 15;
 
   return (
     <Modal

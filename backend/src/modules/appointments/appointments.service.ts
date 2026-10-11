@@ -90,12 +90,18 @@ export async function createAppointment(
   const now = new Date();
 
   const service = await prisma.service.findUnique({ where: { id: input.serviceId } });
-  if (!service?.active) throw AppError.businessRule('El servicio no está disponible');
+  if (!service) throw AppError.notFound('El servicio no existe');
+  if (!service.active) throw AppError.businessRule('El servicio ya no está disponible');
 
-  const staff = await prisma.staff.findFirst({
-    where: { id: input.staffId, active: true, services: { some: { serviceId: service.id } } },
+  const staff = await prisma.staff.findUnique({
+    where: { id: input.staffId },
+    include: { services: { where: { serviceId: service.id } } },
   });
-  if (!staff) throw AppError.businessRule('El profesional no ofrece ese servicio');
+  if (!staff) throw AppError.notFound('El profesional no existe');
+  if (!staff.active) throw AppError.businessRule('El profesional ya no está disponible');
+  if (staff.services.length === 0) {
+    throw AppError.businessRule('El profesional no ofrece ese servicio');
+  }
 
   const endsAt = addMinutes(startsAt, service.durationMinutes);
 

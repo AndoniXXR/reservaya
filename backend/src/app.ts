@@ -24,7 +24,13 @@ export function createApp() {
   app.disable('x-powered-by');
 
   app.use(helmet());
-  app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
+  app.use(
+    cors({
+      origin: env.CORS_ORIGIN,
+      credentials: true,
+      exposedHeaders: ['RateLimit', 'RateLimit-Policy', 'Retry-After'],
+    }),
+  );
   app.use(express.json({ limit: '100kb' }));
   app.use(cookieParser());
   app.use(

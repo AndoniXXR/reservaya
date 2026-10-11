@@ -13,12 +13,17 @@ export const mineQuerySchema = z.object({
   scope: z.enum(['upcoming', 'past']).default('upcoming'),
 });
 
-export const adminListQuerySchema = paginationSchema.extend({
-  from: z.iso.date().optional(),
-  to: z.iso.date().optional(),
-  staffId: z.uuid().optional(),
-  status: z.enum(['CONFIRMED', 'CANCELLED', 'COMPLETED', 'NO_SHOW']).optional(),
-});
+export const adminListQuerySchema = paginationSchema
+  .extend({
+    from: z.iso.date().optional(),
+    to: z.iso.date().optional(),
+    staffId: z.uuid().optional(),
+    status: z.enum(['CONFIRMED', 'CANCELLED', 'COMPLETED', 'NO_SHOW']).optional(),
+  })
+  .refine((q) => !q.from || !q.to || q.from <= q.to, {
+    message: 'La fecha final debe ser posterior a la inicial',
+    path: ['to'],
+  });
 export type AdminListQuery = z.infer<typeof adminListQuerySchema>;
 
 export const updateStatusSchema = z.object({

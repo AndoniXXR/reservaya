@@ -18,7 +18,13 @@ export const appointmentsRouter = Router();
 
 appointmentsRouter.use(requireAuth);
 
-appointmentsRouter.post('/', validateBody(createAppointmentSchema), controller.create);
+// Solo clientes reservan; el admin gestiona desde el panel (reservar a nombre de un cliente es una mejora futura)
+appointmentsRouter.post(
+  '/',
+  requireRole('CLIENT'),
+  validateBody(createAppointmentSchema),
+  controller.create,
+);
 appointmentsRouter.get('/mine', validateQuery(mineQuerySchema), controller.mine);
 appointmentsRouter.patch('/:id/cancel', validateParams(idParamSchema), controller.cancel);
 

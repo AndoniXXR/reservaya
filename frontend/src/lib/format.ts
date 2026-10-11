@@ -45,3 +45,23 @@ export function toDateString(date: Date): string {
   const d = String(date.getDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
 }
+
+/**
+ * Rango de un día libre. Los días completos (00:00 → 00:00 del día siguiente) se muestran
+ * como fechas sin hora: "domingo 18 de octubre" o "sábado 17 de octubre – lunes 19 de octubre".
+ */
+export function formatTimeOffRange(
+  range: { startsAt: string; endsAt: string },
+  timezone = DEFAULT_TIMEZONE,
+): string {
+  const start = new TZDate(new Date(range.startsAt), timezone);
+  const end = new TZDate(new Date(range.endsAt), timezone);
+  const isMidnight = (d: TZDate) => d.getHours() === 0 && d.getMinutes() === 0;
+  if (isMidnight(start) && isMidnight(end)) {
+    const lastDay = new TZDate(end.getTime() - 24 * 60 * 60 * 1000, timezone);
+    const first = formatDate(start, timezone);
+    const last = formatDate(lastDay, timezone);
+    return first === last ? first : `${first} – ${last}`;
+  }
+  return `${formatDateTime(start, timezone)} → ${formatDateTime(end, timezone)}`;
+}

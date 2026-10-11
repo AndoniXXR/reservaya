@@ -203,7 +203,7 @@ function StaffFormModal({
         className="flex flex-col gap-4"
       >
         <Input label="Nombre" error={errors.name?.message} {...register('name')} />
-        <Textarea label="Bio (opcional)" error={errors.bio?.message} {...register('bio')} />
+        <Textarea label="Biografía (opcional)" error={errors.bio?.message} {...register('bio')} />
         <fieldset>
           <legend className="mb-2 text-sm font-medium text-slate-700">Servicios que ofrece</legend>
           {services.data?.length === 0 && (

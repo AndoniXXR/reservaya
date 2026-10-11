@@ -101,6 +101,37 @@ describe('POST /api/appointments', () => {
     expect(res.status).toBe(401);
   });
 
+  it('el admin no reserva como cliente → 403', async () => {
+    const res = await book(admin.accessToken, upcoming('10:00'));
+    expect(res.status).toBe(403);
+  });
+
+  it('servicio o profesional inexistente → 404 con mensaje claro', async () => {
+    const missing = '00000000-0000-4000-8000-000000000000';
+    const noService = await request(app)
+      .post('/api/appointments')
+      .set(bearer(client.accessToken))
+      .send({ serviceId: missing, staffId, startsAt: upcoming('10:00').toISOString() });
+    expect(noService.status).toBe(404);
+    expect(noService.body.error.message).toBe('El servicio no existe');
+
+    const noStaff = await request(app)
+      .post('/api/appointments')
+      .set(bearer(client.accessToken))
+      .send({ serviceId, staffId: missing, startsAt: upcoming('10:00').toISOString() });
+    expect(noStaff.status).toBe(404);
+    expect(noStaff.body.error.message).toBe('El profesional no existe');
+  });
+
+  it('cuerpo sin Content-Type JSON → 415', async () => {
+    const res = await request(app)
+      .post('/api/appointments')
+      .set(bearer(client.accessToken))
+      .set('Content-Type', 'text/plain')
+      .send('{"serviceId":"x"}');
+    expect(res.status).toBe(415);
+  });
+
   it('horario ocupado → 409', async () => {
     await book(client.accessToken, upcoming('10:00'));
     const other = await createAndLogin(app);
@@ -260,6 +291,11 @@ describe('admin: listado y estados', () => {
 
     const forbidden = await request(app).get('/api/appointments').set(bearer(client.accessToken));
     expect(forbidden.status).toBe(403);
+
+    const inverted = await request(app)
+      .get('/api/appointments?from=2026-12-01&to=2026-01-01')
+      .set(bearer(admin.accessToken));
+    expect(inverted.status).toBe(400);
 
     const res = await request(app)
       .get(`/api/appointments?staffId=${staffId}&status=CONFIRMED&pageSize=1`)

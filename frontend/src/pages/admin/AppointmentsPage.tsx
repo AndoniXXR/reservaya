@@ -55,7 +55,7 @@ export function AppointmentsPage() {
     <div>
       <PageHeader
         title="Citas"
-        description="Todas las citas, con filtros por fecha, profesional y estado."
+        description="Por defecto se muestran desde hoy; vacía «Desde» para ver el historial completo."
       />
 
       <div className="mb-6 grid gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-4">

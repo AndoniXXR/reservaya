@@ -8,6 +8,17 @@ type Source = 'body' | 'query' | 'params';
 // validados se guardan en res.locals.<source> y los controllers los leen de ahí.
 function validate(source: Source, schema: ZodType): RequestHandler {
   return (req, res, next) => {
+    // express.json solo parsea application/json: con otro Content-Type el cuerpo llega vacío
+    if (source === 'body' && req.body === undefined && !req.is('application/json')) {
+      next(
+        new AppError(
+          415,
+          'VALIDATION_ERROR',
+          'Envía el cuerpo en JSON (Content-Type: application/json)',
+        ),
+      );
+      return;
+    }
     const result = schema.safeParse(req[source]);
     if (!result.success) {
       const details: Record<string, string> = {};

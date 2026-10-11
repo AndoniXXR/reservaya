@@ -13,6 +13,7 @@ import {
 } from 'recharts';
 import { fetchOverview } from '@/api/stats';
 import { STATUS_LABELS } from '@/features/appointments/status';
+import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { Input } from '@/components/ui/Input';
@@ -46,6 +47,7 @@ export function AdminDashboardPage() {
     enabled: range.from <= range.to,
   });
 
+  const invalidRange = range.from > range.to;
   const data = stats.data;
   const noShow = data?.noShowRate;
 
@@ -104,6 +106,11 @@ export function AdminDashboardPage() {
         />
       </div>
 
+      {invalidRange && (
+        <div className="mb-6">
+          <Alert tone="warning">La fecha inicial no puede ser posterior a la final.</Alert>
+        </div>
+      )}
       {stats.isError && <ErrorMessage error={stats.error} onRetry={() => stats.refetch()} />}
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -143,6 +150,7 @@ export function AdminDashboardPage() {
                       axisLine={false}
                     />
                     <Tooltip
+                      separator=": "
                       cursor={{ stroke: AXIS_COLOR, strokeDasharray: '3 3' }}
                       formatter={(value) => [String(value), 'Citas']}
                       labelFormatter={(label) => `Día ${label}`}
@@ -169,7 +177,7 @@ export function AdminDashboardPage() {
           <h2 id="top" className="mb-1 font-semibold text-slate-900">
             Servicios más reservados
           </h2>
-          <p className="mb-4 text-xs text-slate-500">Top 5 en el rango</p>
+          <p className="mb-4 text-xs text-slate-500">Los 5 más reservados del rango</p>
           {data ? (
             data.topServices.length === 0 ? (
               <p className="py-12 text-center text-sm text-slate-500">Sin datos</p>
@@ -247,6 +255,7 @@ export function AdminDashboardPage() {
                       axisLine={false}
                     />
                     <Tooltip
+                      separator=": "
                       cursor={{ fill: '#f1f5f9' }}
                       formatter={(value, _name, item) => {
                         const row = item.payload as {

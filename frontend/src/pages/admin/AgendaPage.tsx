@@ -149,12 +149,16 @@ export function AgendaPage() {
                         onClick={() => setSelected(appointment)}
                         className={`absolute inset-x-1 overflow-hidden rounded-md border px-2 py-1 text-left text-xs leading-tight transition hover:shadow focus-visible:outline-2 focus-visible:outline-brand-600 ${STATUS_STYLES[appointment.status]}`}
                         style={{ top, height }}
+                        title={`${appointment.client.name} · ${appointment.service.name} · ${STATUS_LABELS[appointment.status]}`}
                         aria-label={`${formatTime(appointment.startsAt, timezone)} ${appointment.client.name}, ${appointment.service.name}, ${STATUS_LABELS[appointment.status]}`}
                       >
-                        <span className="font-semibold">
+                        <span className="block truncate font-semibold">
                           {formatTime(appointment.startsAt, timezone)} {appointment.client.name}
                         </span>
-                        <span className="block truncate">{appointment.service.name}</span>
+                        {/* En bloques cortos (30 min) la segunda línea no cabe: queda en el tooltip */}
+                        {height >= 40 && (
+                          <span className="block truncate">{appointment.service.name}</span>
+                        )}
                       </button>
                     );
                   })}

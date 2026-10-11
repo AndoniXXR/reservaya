@@ -569,7 +569,8 @@ export const openApiDocument = {
       },
       put: {
         tags: ['Profesionales'],
-        summary: 'Reemplaza todos los bloques (admin). Valida traslapes; devuelve citas afectadas.',
+        summary:
+          'Reemplaza todos los bloques (admin). Valida traslapes; un array vacío deja al profesional sin horario. Devuelve citas afectadas sin modificarlas.',
         security: auth,
         parameters: [idParam],
         requestBody: body({
@@ -653,7 +654,7 @@ export const openApiDocument = {
     '/appointments': {
       post: {
         tags: ['Citas'],
-        summary: 'Crear cita (cliente autenticado)',
+        summary: 'Crear cita (solo rol CLIENT; el admin recibe 403)',
         description:
           'Reglas: servicio y profesional activos, dentro del horario, sin traslape, anticipación mínima/máxima, ' +
           'máximo 5 citas futuras. Si dos peticiones compiten por el mismo horario, la restricción de exclusión de PostgreSQL deja pasar solo una (409).',
@@ -663,6 +664,8 @@ export const openApiDocument = {
           201: json({ type: 'object', properties: { appointment: ref('Appointment') } }),
           400: common[400],
           401: common[401],
+          403: errorResponse('Solo los clientes pueden reservar'),
+          404: errorResponse('Servicio o profesional inexistente'),
           409: errorResponse('Horario ocupado'),
           422: common[422],
         },
