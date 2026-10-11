@@ -87,6 +87,15 @@ erDiagram
 - **Recordatorios idempotentes:** el job reclama cada cita con un `UPDATE … WHERE reminderSentAt IS NULL` antes de enviar, así dos pasadas concurrentes nunca duplican correos.
 - **Imágenes construidas en CI y publicadas en GHCR.** El servidor solo hace `pull`: una EC2 pequeña no tiene memoria para compilar.
 
+### Decisiones de implementación (puntos ambiguos de la especificación)
+
+- "Próximas" en Mis citas son las confirmadas futuras; todo lo demás (pasadas, canceladas, completadas, no asistidas) va a "Historial".
+- La ocupación por profesional cuenta minutos de citas confirmadas, completadas y no asistidas sobre los bloques de horario del rango; los días libres no se descuentan.
+- La agenda del admin muestra de 07:00 a 21:00 y solo la vista por día (la semanal queda como mejora).
+- El límite de citas futuras es 5 (la especificación original decía 3; con 3 el cliente demo se quedaba sin cupo).
+- Al cancelar, se guarda quién lo hizo (`cancelledBy`) y el correo lo indica.
+- En modo demo no existe ningún endpoint para cambiar contraseña o correo, así que no hace falta bloquearlos; sí se bloquea cambiar el nombre del negocio.
+
 ## Correrlo en local
 
 Requisitos: Node 24 y Docker (Docker Engine en WSL 2 sirve; no hace falta Docker Desktop).
