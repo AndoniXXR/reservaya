@@ -7,6 +7,9 @@ import { env } from './config/env.ts';
 import { logger } from './config/logger.ts';
 import { healthRouter } from './modules/health/health.routes.ts';
 import { authRouter } from './modules/auth/auth.routes.ts';
+import { servicesRouter } from './modules/services/services.routes.ts';
+import { settingsRouter } from './modules/settings/settings.routes.ts';
+import { staffRouter, timeOffRouter } from './modules/staff/staff.routes.ts';
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware.ts';
 
 export function createApp() {
@@ -37,6 +40,10 @@ export function createApp() {
 
   app.use('/api/health', healthRouter);
   app.use('/api/auth', authRouter);
+  app.use('/api/settings', settingsRouter);
+  app.use('/api/services', servicesRouter);
+  app.use('/api/staff', staffRouter);
+  app.use('/api/time-off', timeOffRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

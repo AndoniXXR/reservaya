@@ -13,7 +13,11 @@ export function getApiError(error: unknown): ApiErrorBody['error'] | null {
 
 export function getApiErrorMessage(error: unknown, fallback = 'Ocurrió un error inesperado') {
   const apiError = getApiError(error);
-  if (apiError) return apiError.message;
+  if (apiError) {
+    // En errores de validación el detalle por campo es más útil que el mensaje genérico
+    const firstDetail = apiError.details ? Object.values(apiError.details)[0] : undefined;
+    return firstDetail ? `${apiError.message}: ${firstDetail}` : apiError.message;
+  }
   if (isAxiosError(error) && !error.response) return 'No se pudo conectar con el servidor';
   return fallback;
 }

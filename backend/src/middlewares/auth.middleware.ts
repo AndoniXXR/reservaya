@@ -18,18 +18,30 @@ declare global {
   }
 }
 
+function readBearer(header: string | undefined): AuthUser | null | undefined {
+  if (!header?.startsWith('Bearer ')) return undefined;
+  const payload = verifyAccessToken(header.slice('Bearer '.length));
+  return payload ? { id: payload.sub, role: payload.role } : null;
+}
+
+/** Rellena req.user si hay un token válido; no exige sesión. */
+export const optionalAuth: RequestHandler = (req, _res, next) => {
+  const user = readBearer(req.headers.authorization);
+  if (user) req.user = user;
+  next();
+};
+
 export const requireAuth: RequestHandler = (req, _res, next) => {
-  const header = req.headers.authorization;
-  if (!header?.startsWith('Bearer ')) {
+  const user = readBearer(req.headers.authorization);
+  if (user === undefined) {
     next(AppError.unauthorized());
     return;
   }
-  const payload = verifyAccessToken(header.slice('Bearer '.length));
-  if (!payload) {
+  if (user === null) {
     next(AppError.unauthorized('Tu sesión expiró, vuelve a iniciar sesión'));
     return;
   }
-  req.user = { id: payload.sub, role: payload.role };
+  req.user = user;
   next();
 };
 

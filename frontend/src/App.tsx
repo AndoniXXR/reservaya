@@ -1,6 +1,11 @@
 import { Route, Routes } from 'react-router';
+import { AdminLayout } from '@/layouts/AdminLayout';
 import { AppLayout } from '@/layouts/AppLayout';
 import { AdminDashboardPage } from '@/pages/admin/AdminDashboardPage';
+import { ServicesPage } from '@/pages/admin/ServicesPage';
+import { SettingsPage } from '@/pages/admin/SettingsPage';
+import { StaffDetailPage } from '@/pages/admin/StaffDetailPage';
+import { StaffPage } from '@/pages/admin/StaffPage';
 import { HomePage } from '@/pages/HomePage';
 import { LoginPage } from '@/pages/LoginPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
@@ -20,7 +25,13 @@ export function App() {
         <Route element={<RequireAuth />}>
           <Route path="/perfil" element={<ProfilePage />} />
           <Route element={<RequireRole role="ADMIN" />}>
-            <Route path="/admin" element={<AdminDashboardPage />} />
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboardPage />} />
+              <Route path="servicios" element={<ServicesPage />} />
+              <Route path="profesionales" element={<StaffPage />} />
+              <Route path="profesionales/:id" element={<StaffDetailPage />} />
+              <Route path="configuracion" element={<SettingsPage />} />
+            </Route>
           </Route>
         </Route>
 
