@@ -12,6 +12,7 @@ import { availabilityRouter } from './modules/availability/availability.routes.t
 import { servicesRouter } from './modules/services/services.routes.ts';
 import { settingsRouter } from './modules/settings/settings.routes.ts';
 import { staffRouter, timeOffRouter } from './modules/staff/staff.routes.ts';
+import { statsRouter } from './modules/stats/stats.routes.ts';
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware.ts';
 
 export function createApp() {
@@ -48,6 +49,7 @@ export function createApp() {
   app.use('/api/time-off', timeOffRouter);
   app.use('/api/availability', availabilityRouter);
   app.use('/api/appointments', appointmentsRouter);
+  app.use('/api/stats', statsRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

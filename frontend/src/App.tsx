@@ -2,6 +2,8 @@ import { Route, Routes } from 'react-router';
 import { AdminLayout } from '@/layouts/AdminLayout';
 import { AppLayout } from '@/layouts/AppLayout';
 import { AdminDashboardPage } from '@/pages/admin/AdminDashboardPage';
+import { AgendaPage } from '@/pages/admin/AgendaPage';
+import { AppointmentsPage } from '@/pages/admin/AppointmentsPage';
 import { ServicesPage } from '@/pages/admin/ServicesPage';
 import { SettingsPage } from '@/pages/admin/SettingsPage';
 import { StaffDetailPage } from '@/pages/admin/StaffDetailPage';
@@ -31,6 +33,8 @@ export function App() {
           <Route element={<RequireRole role="ADMIN" />}>
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboardPage />} />
+              <Route path="agenda" element={<AgendaPage />} />
+              <Route path="citas" element={<AppointmentsPage />} />
               <Route path="servicios" element={<ServicesPage />} />
               <Route path="profesionales" element={<StaffPage />} />
               <Route path="profesionales/:id" element={<StaffDetailPage />} />
