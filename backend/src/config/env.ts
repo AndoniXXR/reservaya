@@ -4,12 +4,17 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(4000),
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
+  APP_URL: z.string().default('http://localhost:5173'),
   LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).default('info'),
   DATABASE_URL: z.string().min(1, 'DATABASE_URL es obligatoria'),
   DEMO_MODE: z
     .enum(['true', 'false'])
     .default('false')
     .transform((value) => value === 'true'),
+  JWT_ACCESS_SECRET: z.string().min(16, 'JWT_ACCESS_SECRET debe tener al menos 16 caracteres'),
+  JWT_ACCESS_TTL: z.string().default('15m'),
+  REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().positive().default(7),
+  REFRESH_GRACE_SECONDS: z.coerce.number().int().nonnegative().default(30),
 });
 
 export type Env = z.infer<typeof envSchema>;
