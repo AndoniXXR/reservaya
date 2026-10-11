@@ -196,6 +196,21 @@ crontab -e
 
 Copia diaria con `pg_dump` en `/opt/reservaya-backups`, conservando 7 días. Restaurar: `scripts/restore-db.sh <archivo.sql.gz>`.
 
+## Seguridad
+
+Controles implementados y comprobados (pruebas automáticas y sondeos manuales contra la API en marcha):
+
+- Contraseñas con bcrypt (coste 12); comparación contra un hash ficticio cuando el correo no existe para no revelar cuentas por tiempo de respuesta.
+- Access token JWT de 15 min solo en memoria; refresh token opaco (hash SHA-256 en base de datos) en cookie `httpOnly`, `sameSite=strict`, `secure` en producción y ruta `/api/auth`; rotación con detección de reutilización. Un JWT con `alg: none` o firma inválida devuelve 401.
+- Autorización por rol en cada ruta de admin (403), propiedad de recursos verificada (una cita ajena responde 404), el registro ignora cualquier `role` enviado y `PATCH /me` solo acepta nombre y teléfono.
+- Validación de toda entrada con Zod, cuerpo limitado a 100 kB (413), JSON malformado → 400, errores internos sin detalles (500 genérico, detalle solo en el log).
+- `helmet` (CSP, HSTS, nosniff, frameguard), CORS restringido al origen del frontend, rate limit en login y registro (10 / 15 min), `trust proxy` para la IP real detrás de Caddy, cabeceras de seguridad y HSTS también en Caddy.
+- Sin SQL dinámico: Prisma y `$queryRaw` con plantillas parametrizadas. Sin `dangerouslySetInnerHTML`; el HTML de los correos escapa los datos del usuario.
+- Secretos solo en `.env` (ignorado por git); en producción el arranque falla si `JWT_ACCESS_SECRET` tiene menos de 32 caracteres o es el valor de ejemplo. Contenedor del backend sin privilegios (`node`).
+- Dependencias: `npm audit` limpio salvo avisos en `mysql2` y `deepmerge-ts`, que llegan a través de la CLI de Prisma (dependencia obligatoria de `@prisma/client` 7) y no se ejecutan en esta aplicación (base PostgreSQL); `mysql2` se elimina de la imagen de producción.
+
+Pendiente o fuera de alcance: verificación de correo al registrarse, bloqueo de cuenta por intentos fallidos (solo hay límite por IP), 2FA. En la demo pública Mailpit es visible para cualquiera: no usar datos reales.
+
 ## Próximas mejoras
 
 - Recordatorios por WhatsApp (API de WhatsApp Business o Twilio).

@@ -37,7 +37,11 @@ ENV NODE_ENV=production CI=true
 COPY package.json package-lock.json ./
 COPY backend/package.json backend/
 COPY frontend/package.json frontend/
-RUN npm ci --workspace backend --omit=dev --ignore-scripts && npm cache clean --force
+# @prisma/client 7 depende de la CLI "prisma", que arrastra mysql2 (con avisos de seguridad
+# y sin uso aquí: la base es PostgreSQL). Se elimina de la imagen final.
+RUN npm ci --workspace backend --omit=dev --ignore-scripts \
+  && rm -rf node_modules/mysql2 \
+  && npm cache clean --force
 COPY --from=build /app/backend/dist backend/dist
 WORKDIR /app/backend
 USER node

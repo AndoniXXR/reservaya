@@ -2,6 +2,10 @@ import type { ErrorRequestHandler, RequestHandler } from 'express';
 import { logger } from '../config/logger.ts';
 import { AppError } from '../utils/errors.ts';
 
+function isBodyParserError(err: unknown): err is { type: string; status?: number } {
+  return typeof err === 'object' && err !== null && 'type' in err && typeof err.type === 'string';
+}
+
 export const notFoundHandler: RequestHandler = (_req, _res, next) => {
   next(AppError.notFound('La ruta no existe'));
 };
@@ -18,9 +22,18 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     return;
   }
 
-  // Cuerpo JSON malformado (lanzado por express.json)
+  // Errores del parser de cuerpo (express.json): JSON malformado o cuerpo demasiado grande
   if (err instanceof SyntaxError && 'body' in err) {
     res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'JSON inválido' } });
+    return;
+  }
+  if (isBodyParserError(err) && err.type === 'entity.too.large') {
+    res.status(413).json({
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: 'El cuerpo de la petición es demasiado grande',
+      },
+    });
     return;
   }
 

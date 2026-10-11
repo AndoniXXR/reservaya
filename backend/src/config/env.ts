@@ -36,6 +36,16 @@ function loadEnv(): Env {
     );
     throw new Error(`Variables de entorno inválidas:\n${problems.join('\n')}`);
   }
+  // En producción el secreto JWT debe ser largo y distinto del valor de ejemplo
+  if (
+    result.data.NODE_ENV === 'production' &&
+    (result.data.JWT_ACCESS_SECRET.length < 32 ||
+      result.data.JWT_ACCESS_SECRET.startsWith('cambia-esto'))
+  ) {
+    throw new Error(
+      'JWT_ACCESS_SECRET debe tener al menos 32 caracteres aleatorios en producción (openssl rand -hex 32)',
+    );
+  }
   return result.data;
 }
 
