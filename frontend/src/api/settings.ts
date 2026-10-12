@@ -12,6 +12,8 @@ export interface BusinessSettings {
   description: string | null;
   /** true en la demo pública: los datos se reinician cada noche */
   demoMode: boolean;
+  /** Visor de correos de la demo (solo en el despliegue con Docker) */
+  demoMailUrl?: string | null;
 }
 
 export async function fetchSettings() {

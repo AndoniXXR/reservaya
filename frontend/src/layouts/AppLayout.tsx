@@ -26,12 +26,22 @@ export function AppLayout() {
     <div className="flex min-h-screen flex-col">
       {settings.data?.demoMode && (
         <p className="bg-amber-50 px-4 py-1.5 text-center text-xs text-amber-800">
-          Demo pública: los datos se reinician cada noche y no debes usar datos reales. Los correos
-          son visibles para cualquiera en{' '}
-          <a href="/mailpit/" className="font-medium underline" target="_blank" rel="noreferrer">
-            /mailpit
-          </a>
-          .
+          Demo pública: los datos se reinician cada noche y no debes usar datos reales.
+          {settings.data.demoMailUrl && (
+            <>
+              {' '}
+              Los correos son visibles para cualquiera en{' '}
+              <a
+                href={settings.data.demoMailUrl}
+                className="font-medium underline"
+                target="_blank"
+                rel="noreferrer"
+              >
+                {settings.data.demoMailUrl}
+              </a>
+              .
+            </>
+          )}
         </p>
       )}
       <header className="border-b border-slate-200 bg-white">

@@ -24,6 +24,8 @@ const envSchema = z.object({
     .default('false')
     .transform((value) => value === 'true'),
   MAIL_FROM: z.string().default('ReservaYa <no-responder@reservaya.demo>'),
+  /** URL pública del visor de correos de la demo (Mailpit); solo en el despliegue con Docker */
+  DEMO_MAIL_URL: z.string().optional(),
   /** Si está definido, habilita /api/jobs/* para un planificador externo (Vercel Cron) */
   CRON_SECRET: z.string().min(16).optional(),
 });

@@ -7,7 +7,7 @@ import * as settingsService from './settings.service.ts';
 // Datos públicos del negocio (sin id interno) más si la instalación es la demo pública
 function toPublic(settings: BusinessSettings) {
   const { id: _id, ...rest } = settings;
-  return { ...rest, demoMode: env.DEMO_MODE };
+  return { ...rest, demoMode: env.DEMO_MODE, demoMailUrl: env.DEMO_MAIL_URL ?? null };
 }
 
 export const getSettings: RequestHandler = async (_req, res) => {
