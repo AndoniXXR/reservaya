@@ -1,6 +1,8 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 
-export const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:4000/api';
+// En producción el frontend y la API comparten origen (/api); en desarrollo la API corre aparte
+export const API_URL =
+  import.meta.env.VITE_API_URL ?? (import.meta.env.PROD ? '/api' : 'http://localhost:4000/api');
 
 // El access token vive solo en memoria (nunca en localStorage).
 let accessToken: string | null = null;

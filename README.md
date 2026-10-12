@@ -3,7 +3,9 @@
 Sistema de gestión de citas en línea para negocios locales (barberías, clínicas, salones).
 Los clientes reservan por sí mismos; el negocio administra servicios, profesionales, horarios y ve estadísticas.
 
-**Demo:** _pendiente de desplegar_ · **API:** `/api/docs` (Swagger)
+**Demo:** https://reservaya-eta.vercel.app · **API:** https://reservaya-eta.vercel.app/api/docs (Swagger) · **Código:** https://github.com/AndoniXXR/reservaya
+
+Demo pública: los datos se reinician cada noche; no uses datos reales.
 
 | Rol     | Correo                   | Contraseña    |
 | ------- | ------------------------ | ------------- |
